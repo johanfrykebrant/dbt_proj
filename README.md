@@ -4,7 +4,9 @@ Welcome to your new dbt project!
 
 Try running the following commands:
 - dbt run
+- dbt run --full-refresh 
 - dbt test
+- dbt debug
 
 
 ### Resources:

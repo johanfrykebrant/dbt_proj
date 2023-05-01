@@ -1,7 +1,7 @@
 {{
     config(
         materialized='incremental'
-		, schema='analytics'
+        , unique_key='observation_timestamp'
     )
 }}
 
@@ -18,15 +18,19 @@ SELECT 	observation_timestamp AS observation_timestamp_malmo,
 FROM staging.observations
 WHERE 	observation_name = 'Lufttemperatur'
 		AND observation_station = 'Malmö A'
-)
-
+),
+final AS (
 SELECT COALESCE (malmo_temp.observation_timestamp_malmo, pi_node_temp.observation_timestamp_pi_node) AS observation_timestamp
     ,observation_value_malmö
     ,observation_value_pi_node
 FROM malmo_temp
 FULL OUTER JOIN pi_node_temp 
 ON malmo_temp.observation_timestamp_malmo=pi_node_temp.observation_timestamp_pi_node
+)
+
+SELECT *
+FROM final
 
 {% if is_incremental() %}
-	AND COALESCE (malmo_temp.observation_timestamp_malmo, pi_node_temp.observation_timestamp_pi_node) > (SELECT MAX(observation_timestamp) FROM {{ this }})
+	WHERE observation_timestamp > (SELECT MAX(observation_timestamp) FROM {{ this }})
 {% endif %}

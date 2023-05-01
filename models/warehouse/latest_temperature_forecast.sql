@@ -1,7 +1,6 @@
 {{
     config(
         materialized='incremental'
-		, schema='analytics'
 		, unique_key= 'forecast_timestamp'
 		, incremental_strategy='delete+insert'
     )
@@ -30,7 +29,3 @@ SELECT 	forecast_timestamp,
 		created_timestamp_utc
 FROM ranked_forecasts
 WHERE w = 1
-{% if is_incremental() %}
-	AND created_timestamp_utc > (SELECT MAX(created_timestamp_utc) FROM {{ this }})
-{% endif %}
-
